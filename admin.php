@@ -140,6 +140,12 @@ SELECT
   $uct = array('NULL',0,0,0,0,0);
   $ranks = array();
 
+  // the following algorithm is a conversion into PHP of the Perl script
+  // convertcomments.pl by dschwen, see https://github.com/dschwen/g2piwigo
+  //
+  // this plugin just makes things "simpler" for users but the hard part
+  // comes from dschwen, he deserves all credits!
+  
   foreach ($piwigo_paths as $dir => $piwigo_id)
   {
     $path = explode('/', $dir);
