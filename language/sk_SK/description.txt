@@ -1,0 +1,1 @@
+Načítanie dát z Menalto Gallery do Piwigo
