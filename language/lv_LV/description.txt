@@ -1,0 +1,1 @@
+importēt datus no Menalto Galerijas Piwigo
