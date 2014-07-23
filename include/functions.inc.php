@@ -55,3 +55,28 @@ function m2p_remove_bbcode($string)
 
   return $string;
 }
+
+/**
+ * list all tables in an array
+ *
+ * @return array
+ */
+function m2p_get_tables($prefix='')
+{
+  $tables = array();
+
+  $query = '
+SHOW TABLES
+;';
+  $result = pwg_query($query);
+
+  while ($row = pwg_db_fetch_row($result))
+  {
+    if (preg_match('/^'.$prefix.'/', $row[0]))
+    {
+      $tables[] = $row[0];
+    }
+  }
+
+  return $tables;
+}

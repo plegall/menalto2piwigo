@@ -134,28 +134,35 @@ SELECT
 
   m2p_db_connect();
 
-  // Gallery2 parent Ids (root is always 7!)
-  $ids = array(7,0,0,0,0,0);
-  // Piwigo uppercats
-  $uct = array('NULL',0,0,0,0,0);
-  $ranks = array();
+  // Gallery2 or Gallery3?
+  $menalto_tables = m2p_get_tables($pt);
 
-  // the following algorithm is a conversion into PHP of the Perl script
-  // convertcomments.pl by dschwen, see https://github.com/dschwen/g2piwigo
-  //
-  // this plugin just makes things "simpler" for users but the hard part
-  // comes from dschwen, he deserves all credits!
-  
-  foreach ($piwigo_paths as $dir => $piwigo_id)
+  if (in_array($pt.'FileSystemEntity', $menalto_tables))
   {
-    $path = explode('/', $dir);
-    $basename = $path[count($path)-1];
-    $level = count($path);
+    // Gallery version 2
 
-    $parentId = $ids[$level-1];
+    // Gallery2 parent Ids (root is always 7!)
+    $ids = array(7,0,0,0,0,0);
+    // Piwigo uppercats
+    $uct = array('NULL',0,0,0,0,0);
+    $ranks = array();
 
-    // get id and title/summary/description of tail element in path
-    $query = "
+    // the following algorithm is a conversion into PHP of the Perl script
+    // convertcomments.pl by dschwen, see https://github.com/dschwen/g2piwigo
+    //
+    // this plugin just makes things "simpler" for users but the hard part
+    // comes from dschwen, he deserves all credits!
+  
+    foreach ($piwigo_paths as $dir => $piwigo_id)
+    {
+      $path = explode('/', $dir);
+      $basename = $path[count($path)-1];
+      $level = count($path);
+
+      $parentId = $ids[$level-1];
+
+      // get id and title/summary/description of tail element in path
+      $query = "
 SELECT 
     f.".$pc."id,
     i.".$pc."title,
@@ -173,120 +180,120 @@ SELECT
   WHERE c.".$pc."parentId = ".$parentId."
     AND f.".$pc."pathComponent='".$basename."'
 ;";
-    // echo '<pre>'.$query."</pre>";
-    $row = pwg_db_fetch_row(pwg_query($query));
+      // echo '<pre>'.$query."</pre>";
+      $row = pwg_db_fetch_row(pwg_query($query));
     
-    // print "$row[4] - $parentId -> $row[0] : $row[1] $row[2] $row[3]\n";
-    $title = m2p_remove_bbcode($row[1]);
-    $summary = m2p_remove_bbcode($row[2]);
-    $description = m2p_remove_bbcode($row[3]);
-    $weight = $row[5];
-    $views = $row[6];
-    $date_available = $row[7];
-    $ids[$level] = $row[0];
-    $pid[$row[0]] = $dir;
+      // print "$row[4] - $parentId -> $row[0] : $row[1] $row[2] $row[3]\n";
+      $title = m2p_remove_bbcode($row[1]);
+      $summary = m2p_remove_bbcode($row[2]);
+      $description = m2p_remove_bbcode($row[3]);
+      $weight = $row[5];
+      $views = $row[6];
+      $date_available = $row[7];
+      $ids[$level] = $row[0];
+      $pid[$row[0]] = $dir;
 
-    if ($row[4] == 0)
-    {
-      // Menalto says it's an image
+      if ($row[4] == 0)
+      {
+        // Menalto says it's an image
 
-      if (strpos($piwigo_id, 'i') === false)
-      {
-        echo 'Error, '.$piwig_id.' is not an image and Menalto says it is an image';
-      }
-      
-      $comment = "";
-      if ( $summary != "" and $description != "" )
-      {
-        $comment = "<b>$summary</b> - $description";
-      }
-      else
-      {
-        if ($summary != "")
+        if (strpos($piwigo_id, 'i') === false)
         {
-          $comment = $summary;
+          echo 'Error, '.$piwig_id.' is not an image and Menalto says it is an image';
+        }
+      
+        $comment = "";
+        if ( $summary != "" and $description != "" )
+        {
+          $comment = "<b>$summary</b> - $description";
         }
         else
         {
-          $comment = $description;
+          if ($summary != "")
+          {
+            $comment = $summary;
+          }
+          else
+          {
+            $comment = $description;
+          }
         }
-      }
 
-      $image_id = substr($piwigo_id, 1);
+        $image_id = substr($piwigo_id, 1);
       
-      $image_updates[] = array(
-        'id' => $image_id,
-        'name' => pwg_db_real_escape_string($title),
-        'comment' => pwg_db_real_escape_string($comment),
-        'date_available' => $date_available,
-        );
+        $image_updates[] = array(
+          'id' => $image_id,
+          'name' => pwg_db_real_escape_string($title),
+          'comment' => pwg_db_real_escape_string($comment),
+          'date_available' => $date_available,
+          );
       
-      // build a map from gallery2 ids to piwigo image ids
-      $iid[$row[0]] = $image_id;
-    }
-    else
-    {
-      // album (folder)
-      if (strpos($piwigo_id, 'c') === false)
-      {
-        echo 'Error, '.$piwig_id.' is not an album and Menalto says it is an album';
-      }
-      
-      $comment = "";
-      if ( $summary != "" and $description != "" )
-      {
-        $comment = "$summary <!--complete--> $description";
+        // build a map from gallery2 ids to piwigo image ids
+        $iid[$row[0]] = $image_id;
       }
       else
       {
-        if ($summary != "")
+        // album (folder)
+        if (strpos($piwigo_id, 'c') === false)
         {
-          $comment = $summary;
+          echo 'Error, '.$piwig_id.' is not an album and Menalto says it is an album';
+        }
+      
+        $comment = "";
+        if ( $summary != "" and $description != "" )
+        {
+          $comment = "$summary <!--complete--> $description";
         }
         else
         {
-          $comment = "<!--complete-->$description";
+          if ($summary != "")
+          {
+            $comment = $summary;
+          }
+          else
+          {
+            $comment = "<!--complete-->$description";
+          }
         }
-      }
 
-      // get piwigo category id
-      $cat_id = substr($piwigo_id, 1);
-      $uct[$level] = $cat_id;
+        // get piwigo category id
+        $cat_id = substr($piwigo_id, 1);
+        $uct[$level] = $cat_id;
       
-      $cat_updates[] = array(
-        'id' => $cat_id,
-        'name' => pwg_db_real_escape_string($title),
-        'comment' => pwg_db_real_escape_string($comment),
-        'rank' => $weight,
-        );
+        $cat_updates[] = array(
+          'id' => $cat_id,
+          'name' => pwg_db_real_escape_string($title),
+          'comment' => pwg_db_real_escape_string($comment),
+          'rank' => $weight,
+          );
 
-      // get highlight picture 
-      $query = "
+        // get highlight picture 
+        $query = "
 SELECT d2.".$pc."derivativeSourceId 
   FROM ".$pt."ChildEntity c
     JOIN ".$pt."Derivative d1 ON c.".$pc."id = d1.".$pc."id
     JOIN ".$pt."Derivative d2 ON d1.".$pc."derivativeSourceId=d2.".$pc."id
   WHERE c.".$pc."parentId = ".$ids[$level];
-      $subresult = pwg_query($query);
-      $subrow = pwg_db_fetch_row($subresult);
-      $hid[$cat_id] = $subrow[0];
+        $subresult = pwg_query($query);
+        $subrow = pwg_db_fetch_row($subresult);
+        $hid[$cat_id] = $subrow[0];
+      }
     }
-  }
 
-  // apply highlites as representative images
-  foreach ($hid as $cat_id => $menalto_id)
-  {
-    if (!empty($menalto_id))
+    // apply highlites as representative images
+    foreach ($hid as $cat_id => $menalto_id)
     {
-      $album_thumbs[] = array(
-        'id' => $cat_id,
-        'representative_picture_id' => $iid[$menalto_id],
-        );
+      if (!empty($menalto_id))
+      {
+        $album_thumbs[] = array(
+          'id' => $cat_id,
+          'representative_picture_id' => $iid[$menalto_id],
+          );
+      }
     }
-  }
 
-  // copy comments
-  $query = "
+    // copy comments
+    $query = "
 SELECT
     c.".$pc."parentId AS id,
     t.".$pc."subject AS subject,
@@ -297,70 +304,324 @@ SELECT
     JOIN ".$pt."Comment t ON t.".$pc."id = c.".$pc."id
   WHERE t.".$pc."publishStatus=0
 ";
-  $result = pwg_query($query);
-  while ($row = pwg_db_fetch_assoc($result))
-  {
-    if (isset($iid[ $row['id'] ]))
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
     {
-      $comment = $row['comment'];
-      if (!empty($row['subject']))
+      if (isset($iid[ $row['id'] ]))
       {
-        $comment = '[b]'.$row['subject'].'[/b] '.$comment;
+        $comment = $row['comment'];
+        if (!empty($row['subject']))
+        {
+          $comment = '[b]'.$row['subject'].'[/b] '.$comment;
+        }
+
+        $comment_inserts[] = array(
+          'image_id' => $iid[ $row['id'] ],
+          'date' => $row['date'],
+          'author' => pwg_db_real_escape_string($row['author']),
+          'content' => pwg_db_real_escape_string($comment),
+          'validated' => 'true',
+          );
       }
-
-      $comment_inserts[] = array(
-        'image_id' => $iid[ $row['id'] ],
-        'date' => $row['date'],
-        'author' => pwg_db_real_escape_string($row['author']),
-        'content' => pwg_db_real_escape_string($comment),
-        'validated' => 'true',
-        );
     }
+
+    m2p_db_disconnect();
+
+    // echo '<pre>'; print_r($image_updates); echo '</pre>';
+    // echo '<pre>'; print_r($cat_updates); echo '</pre>';
+    // echo '<pre>'; print_r($hid); echo '</pre>';
+    // echo '<pre>'; print_r($iid); echo '</pre>';
+    // echo '<pre>'; print_r($album_thumbs); echo '</pre>';
+    // echo '<pre>'; print_r($comment_inserts); echo '</pre>';
+  
+    mass_updates(
+      IMAGES_TABLE,
+      array(
+        'primary' => array('id'),
+        'update'  => array('name', 'comment', 'date_available'),
+        ),
+      $image_updates
+      );
+
+    mass_updates(
+      CATEGORIES_TABLE,
+      array(
+        'primary' => array('id'),
+        'update'  => array('name', 'comment', 'rank'),
+        ),
+      $cat_updates
+      );
+
+    mass_updates(
+      CATEGORIES_TABLE,
+      array(
+        'primary' => array('id'),
+        'update'  => array('representative_picture_id'),
+        ),
+      $album_thumbs
+      );
+
+    mass_inserts(
+      COMMENTS_TABLE,
+      array_keys($comment_inserts[0]),
+      $comment_inserts
+      );
+  
+    array_push($page['infos'], l10n('Information data registered in database'));
   }
+  elseif (in_array($pt.'items_tags', $menalto_tables))
+  {
+    // Gallery version 3
 
-  m2p_db_disconnect();
+    $query = '
+SELECT
+    id,
+    name,
+    parent_id,
+    relative_path_cache,
+    title,
+    description,
+    type,
+    view_count,
+    created,
+    weight,
+    album_cover_item_id
+  FROM '.$pt.'items
+;';
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
+    {
+      if (isset($piwigo_paths[ $row['relative_path_cache'] ]))
+      {
+        $piwigo_id = $piwigo_paths[ $row['relative_path_cache'] ];
+      }
+      else
+      {
+        continue;
+      }
+      
+      if ('photo' == $row['type'])
+      {
+        $image_id = substr($piwigo_id, 1);
+      
+        $image_updates[] = array(
+          'id' => $image_id,
+          'name' => pwg_db_real_escape_string($row['title']),
+          'comment' => pwg_db_real_escape_string($row['description']),
+          'date_available' => date('Y-m-d H:i:s', $row['created']),
+          'hit' => $row['view_count'],
+          );
 
-  // echo '<pre>'; print_r($image_updates); echo '</pre>';
-  // echo '<pre>'; print_r($cat_updates); echo '</pre>';
-  // echo '<pre>'; print_r($hid); echo '</pre>';
-  // echo '<pre>'; print_r($iid); echo '</pre>';
-  // echo '<pre>'; print_r($album_thumbs); echo '</pre>';
-  // echo '<pre>'; print_r($comment_inserts); echo '</pre>';
-  
-  mass_updates(
-    IMAGES_TABLE,
-    array(
-      'primary' => array('id'),
-      'update'  => array('name', 'comment', 'date_available'),
-      ),
-    $image_updates
-    );
+        // build a map from menalto ids to piwigo image ids
+        $iid[ $row['id'] ] = $image_id;
+      }
+      elseif ('album' == $row['type'])
+      {
+        $cat_id = substr($piwigo_id, 1);
+        
+        $cat_updates[] = array(
+          'id' => $cat_id,
+          'name' => pwg_db_real_escape_string($row['title']),
+          'comment' => pwg_db_real_escape_string($row['description']),
+          'rank' => $row['weight'],
+          );
+        
+        $cover_id[$cat_id] = $row['album_cover_item_id'];
+      }
+    }
 
-  mass_updates(
-    CATEGORIES_TABLE,
-    array(
-      'primary' => array('id'),
-      'update'  => array('name', 'comment', 'rank'),
-      ),
-    $cat_updates
-    );
+    // album cover id
+    foreach ($cover_id as $cat_id => $menalto_id)
+    {
+      if (!empty($menalto_id) and isset($iid[$menalto_id]))
+      {
+        $album_thumbs[] = array(
+          'id' => $cat_id,
+          'representative_picture_id' => $iid[$menalto_id],
+          );
+      }
+    }
 
-  mass_updates(
-    CATEGORIES_TABLE,
-    array(
-      'primary' => array('id'),
-      'update'  => array('representative_picture_id'),
-      ),
-    $album_thumbs
-    );
+    // user comments;
+    $query = '
+SELECT
+    author_id,
+    server_remote_addr,
+    created,
+    name,
+    full_name,
+    email,
+    url,
+    guest_email,
+    guest_name,
+    guest_url,
+    item_id,
+    state,
+    text
+  FROM '.$pt.'comments
+    JOIN '.$pt.'users AS u ON author_id = u.id
+;';
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
+    {
+      if (isset($iid[ $row['item_id'] ]))
+      {
+        if (!empty($row['guest_name']))
+        {
+          $name = $row['guest_name'];
+          $email = $row['guest_email'];
+          $url = $row['guest_url'];
+        }
+        else
+        {
+          $name = $row['full_name'].' ('.$row['name'].')';
+          $email = $row['email'];
+          $url = $row['url'];
+        }
 
-  mass_inserts(
-    COMMENTS_TABLE,
-    array_keys($comment_inserts[0]),
-    $comment_inserts
-    );
-  
-  array_push($page['infos'], l10n('Information data registered in database'));
+        if (2 == $row['author_id']) // default admin on G3
+        {
+          $author_id = 1; // default admin on Piwigo
+        }
+        else
+        {
+          $author_id = 2; // guest on Piwigo
+        }
+
+        $validated = 'true';
+        if ('unpublished' == $row['state'])
+        {
+          $validated = 'false';
+        }
+
+        $anonymous_id = implode('.', array_slice(explode('.', $row['server_remote_addr']), 0, 3));
+        
+        $comment_inserts[] = array(
+          'image_id' => $iid[ $row['item_id'] ],
+          'date' => date('Y-m-d H:i:s', $row['created']),
+          'author' => pwg_db_real_escape_string($name),
+          'author_id' => $author_id,
+          'anonymous_id' => $anonymous_id,
+          'email' => pwg_db_real_escape_string($email),
+          'website_url' => pwg_db_real_escape_string($url),
+          'content' => pwg_db_real_escape_string($row['text']),
+          'validated' => $validated,
+          );
+      }
+    }
+
+    // tags
+    $query = '
+SELECT
+    id,
+    name
+   FROM '.$pt.'tags
+;';
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
+    {
+      $tag_inserts[] = array(
+        'name' => pwg_db_real_escape_string($row['name']),
+        'url_name' => str2url($row['name']),
+        );
+
+      $menalto_tag_ids[ $row['name'] ] = $row['id'];
+    }
+
+    $query = '
+SELECT
+    item_id,
+    tag_id
+  FROM '.$pt.'items_tags
+;';
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
+    {
+      $items_tags[] = $row;
+    }
+
+    m2p_db_disconnect();
+
+    mass_updates(
+      IMAGES_TABLE,
+      array(
+        'primary' => array('id'),
+        'update'  => array('name', 'comment', 'date_available', 'hit'),
+        ),
+      $image_updates
+      );
+    
+    mass_updates(
+      CATEGORIES_TABLE,
+      array(
+        'primary' => array('id'),
+        'update'  => array('name', 'comment', 'rank'),
+        ),
+      $cat_updates
+      );
+    
+    mass_updates(
+      CATEGORIES_TABLE,
+      array(
+        'primary' => array('id'),
+        'update'  => array('representative_picture_id'),
+        ),
+      $album_thumbs
+      );
+    
+    mass_inserts(
+      COMMENTS_TABLE,
+      array_keys($comment_inserts[0]),
+      $comment_inserts
+      );
+
+    mass_inserts(
+      TAGS_TABLE,
+      array_keys($tag_inserts[0]),
+      $tag_inserts
+      );
+
+    // we need to retrieve the mapping of piwigo tag name => piwigo tag id,
+    // for image_tag associations
+    $query = '
+SELECT
+    id,
+    name
+  FROM '.TAGS_TABLE.'
+;';
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
+    {
+      if (isset($menalto_tag_ids[ $row['name'] ]))
+      {
+        $tag_id_convert[ $menalto_tag_ids[ $row['name'] ] ] = $row['id'];
+      }
+    }
+
+    foreach ($items_tags as $item_tag)
+    {
+      if (isset($iid[ $item_tag['item_id'] ]) and isset($tag_id_convert[ $item_tag['tag_id'] ]))
+      {
+        $image_tag_inserts[] = array(
+          'image_id' => $iid[ $item_tag['item_id'] ],
+          'tag_id' => $tag_id_convert[ $item_tag['tag_id'] ],
+          );
+      }
+    }
+
+    mass_inserts(
+      IMAGE_TAG_TABLE,
+      array_keys($image_tag_inserts[0]),
+      $image_tag_inserts
+      );
+
+    array_push($page['infos'], l10n('Information data registered in database'));
+  }
+  else
+  {
+    m2p_db_disconnect();
+    array_push($page['errors'], l10n('No Menalto tables found!'));
+  }
 }
 
 

@@ -20,7 +20,7 @@
 // | Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, |
 // | USA.                                                                  |
 // +-----------------------------------------------------------------------+
-$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2 installation into Piwigo.'] = 'Menalto2Piwigo spraudnis importē datus Piwigo no Menalto Gallery2 instalācijas.';
+$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Menalto2Piwigo spraudnis importē datus Piwigo no Menalto Gallery2/Gallery3 instalācijas.';
 $lang['Submit the form at the end of this page'] = 'Apstiprināt formu šīs lapas beigās';
 $lang['column prefix'] = 'kolonas prefikss';
 $lang['database host'] = 'datubāzes hosts';
@@ -32,7 +32,7 @@ $lang['Name and description for albums'] = 'Albūmu nosaukumi un apraksts';
 $lang['database password'] = 'datubāzes parole';
 $lang['database name'] = 'datubāzes nosaukums';
 $lang['Start import'] = 'Sākt importu';
-$lang['Copy the content of g2data/albums into piwigo/galleries'] = 'Kopēt g2data/albums saturu piwigo/galleries';
+$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Kopēt g2data/albums (Gallery2) or var/albums (Gallery3) saturu piwigo/galleries';
 $lang['Install and activate plugins:'] = 'Instalēt un aktivēt spraudņus';
 $lang['Imported properties:'] = 'Importētās īpašības';
 $lang['Import from Menalto'] = 'Imports no Menalto';

@@ -8,7 +8,7 @@ fieldset p {text-align:left;}
 
 <fieldset>
   <legend>{'Help'|translate}</legend>
-  <p>{'Menalto2Piwigo plugin imports data from a Menalto Gallery2 installation into Piwigo.'|translate} {'Imported properties:'|translate}</p>
+  <p>{'Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'|translate} {'Imported properties:'|translate}</p>
   <ul>
     <li>{'Title and description for photos'|translate}</li>
     <li>{'Name and description for albums'|translate}</li>
@@ -18,7 +18,7 @@ fieldset p {text-align:left;}
   <p><strong>{'How to use it?'|translate}</strong></p>
 
   <ol>
-    <li>{'Copy the content of g2data/albums into piwigo/galleries'|translate}</li>
+    <li>{'Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'|translate}</li>
     <li><a href="admin.php?page=site_update&amp;site=1">{'Synchronize'|translate}</a></li>
     <li>{'Submit the form at the end of this page'|translate}</li>
     <li>{'Install and activate plugins:'|translate} <a href="http://piwigo.org/ext/extension_view.php?eid=175" target="_blank">Extended Description</a></li>
@@ -49,7 +49,7 @@ fieldset p {text-align:left;}
     <input type="text" name="prefix_table" value="{$prefix_table}">
   </p>
 
-  <p><strong>{'column prefix'|translate}</strong><br>
+  <p><strong>{'column prefix'|translate}</strong> ({'useless on Gallery3'|translate})<br>
     <input type="text" name="prefix_column" value="{$prefix_column}">
   </p>
 

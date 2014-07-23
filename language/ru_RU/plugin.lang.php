@@ -20,8 +20,8 @@
 // | Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, |
 // | USA.                                                                  |
 // +-----------------------------------------------------------------------+
-$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2 installation into Piwigo.'] = 'Плагин Menalto2Piwigo импортирует данные из Menalto Gallery2 для установки их в Piwigo';
-$lang['Copy the content of g2data/albums into piwigo/galleries'] = 'Копирование содержимого альбомов g2data в галереи Piwigo';
+$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Плагин Menalto2Piwigo импортирует данные из Menalto Gallery2/Gallery3 для установки их в Piwigo';
+$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Копирование содержимого альбомов g2data в галереи Piwigo';
 $lang['How to use it?'] = 'Как пользоваться?';
 $lang['Import'] = 'Импорт';
 $lang['Import from Menalto'] = 'Импорт из Menalto';

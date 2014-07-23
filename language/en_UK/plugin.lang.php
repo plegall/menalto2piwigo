@@ -20,13 +20,13 @@
 // +-----------------------------------------------------------------------+
 
 $lang['Import from Menalto'] = 'Import from Menalto';
-$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2 installation into Piwigo.'] = 'Menalto2Piwigo plugins imports data from a Menalto Gallery2 installation into Piwigo.';
+$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Menalto2Piwigo plugins imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.';
 $lang['Imported properties:'] = 'Imported properties:';
 $lang['Title and description for photos'] = 'Title and description for photos';
 $lang['Name and description for albums'] = 'Name and description for albums';
 $lang['User comments on photos'] = 'User comments on photos';
 $lang['How to use it?'] = 'How to use it?';
-$lang['Copy the content of g2data/albums into piwigo/galleries'] = 'Copy the content of g2data/albums into piwigo/galleries';
+$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries';
 $lang['Submit the form at the end of this page'] = 'Submit the form at the end of this page';
 $lang['Install and activate plugins:'] = 'Install and activate plugins:';
 $lang['Import'] = 'Import';
@@ -37,4 +37,6 @@ $lang['database password'] = 'database password';
 $lang['table prefix'] = 'table prefix';
 $lang['column prefix'] = 'column prefix';
 $lang['Start import'] = 'Start import';
+$lang['No Menalto tables found!'] = 'No Menalto tables found!';
+$lang['useless on Gallery3'] = 'useless on Gallery3';
 ?>
