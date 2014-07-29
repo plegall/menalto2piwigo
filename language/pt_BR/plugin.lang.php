@@ -38,3 +38,5 @@ $lang['Import from Menalto'] = 'Importar de Menalto';
 $lang['Import'] = 'Importar';
 $lang['How to use it?'] = 'Como usar isto?';
 $lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Copiar o conteúdo de g2data/albums (Gallery2) or var/albums (Gallery3) para piwigo/gallaries';
+$lang['No Menalto tables found!'] = 'Nenhuma tabela Menalto encontrada!';
+$lang['useless on Gallery3'] = 'inútil em Gallery3';
