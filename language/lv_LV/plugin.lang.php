@@ -38,3 +38,5 @@ $lang['Imported properties:'] = 'Importētās īpašības';
 $lang['Import from Menalto'] = 'Imports no Menalto';
 $lang['Import'] = 'imports';
 $lang['How to use it?'] = 'Kā to lietot?';
+$lang['No Menalto tables found!'] = ' Menalto tabulas nav atrastas';
+$lang['useless on Gallery3'] = 'nelietojams Galerijā3';
