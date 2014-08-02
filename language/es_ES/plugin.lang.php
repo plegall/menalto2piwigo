@@ -38,3 +38,5 @@ $lang['database name'] = 'nombre de la base de datos';
 $lang['database password'] = 'contraseña de la base de datos';
 $lang['database user'] = 'usuario de la base de datos';
 $lang['table prefix'] = 'prefijo de la tabla';
+$lang['No Menalto tables found!'] = 'No se encontro ninguna tabla Menalto';
+$lang['useless on Gallery3'] = 'sin uso en Gallery3';
