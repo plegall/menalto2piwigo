@@ -38,3 +38,5 @@ $lang['Import from Menalto'] = 'Načítanie z Menalto';
 $lang['Import'] = 'Načítanie';
 $lang['How to use it?'] = 'Ako to použiť?';
 $lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Kopírovať obsah g2data/albums (Gallery2) or var/albums (Gallery3) do piwigo/galleries';
+$lang['useless on Gallery3'] = 'k ničomu na Galériu3';
+$lang['No Menalto tables found!'] = 'Neboli nájdené žiadne Menalto tabuľky!';
