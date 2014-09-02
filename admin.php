@@ -183,8 +183,13 @@ SELECT
       // echo '<pre>'.$query."</pre>";
       $row = pwg_db_fetch_row(pwg_query($query));
     
-      // print "$row[4] - $parentId -> $row[0] : $row[1] $row[2] $row[3]\n";
+      // print "$row[4] - $parentId -> $row[0] : $row[1] $row[2] $row[3]<br>";
       $title = m2p_remove_bbcode($row[1]);
+      if (empty($title))
+      {
+        $title = $basename;
+      }
+      
       $summary = m2p_remove_bbcode($row[2]);
       $description = m2p_remove_bbcode($row[3]);
       $weight = $row[5];
@@ -333,7 +338,7 @@ SELECT
     // echo '<pre>'; print_r($iid); echo '</pre>';
     // echo '<pre>'; print_r($album_thumbs); echo '</pre>';
     // echo '<pre>'; print_r($comment_inserts); echo '</pre>';
-  
+
     mass_updates(
       IMAGES_TABLE,
       array(
@@ -366,7 +371,7 @@ SELECT
       array_keys($comment_inserts[0]),
       $comment_inserts
       );
-  
+
     array_push($page['infos'], l10n('Information data registered in database'));
   }
   elseif (in_array($pt.'items_tags', $menalto_tables))
