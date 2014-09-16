@@ -38,3 +38,5 @@ $lang['Import from Menalto'] = 'Importa da Menalto';
 $lang['Imported properties:'] = 'Proprietà importati:';
 $lang['Install and activate plugins:'] = 'Installa e attiva plugin:';
 $lang['How to use it?'] = 'Come si usa?';
+$lang['useless on Gallery3'] = 'inutile su Gallery3';
+$lang['No Menalto tables found!'] = 'Nessuna tabella Menalto trovata!';
