@@ -21,7 +21,7 @@
 // | USA.                                                                  |
 // +-----------------------------------------------------------------------+
 $lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Плагин Menalto2Piwigo импортирует данные из Menalto Gallery2/Gallery3 для установки их в Piwigo';
-$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Копирование содержимого альбомов g2data в галереи Piwigo';
+$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Скопировать содержимое альбомов g2data/albums (Gallery2) или var/albums (Gallery3) в piwigo/galleries';
 $lang['How to use it?'] = 'Как пользоваться?';
 $lang['Import'] = 'Импорт';
 $lang['Import from Menalto'] = 'Импорт из Menalto';
