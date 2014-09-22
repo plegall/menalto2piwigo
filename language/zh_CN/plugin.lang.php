@@ -38,3 +38,5 @@ $lang['database name'] = '数据库名称';
 $lang['database password'] = '数据库密码';
 $lang['database user'] = '数据库用户名';
 $lang['table prefix'] = '数据表前缀';
+$lang['No Menalto tables found!'] = '沒有找到 Menalto 表';
+$lang['useless on Gallery3'] = '在Gallery3里没用';
