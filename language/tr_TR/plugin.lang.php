@@ -38,3 +38,5 @@ $lang['Title and description for photos'] = 'Fotoğraflar için başlık ve aç�
 $lang['Submit the form at the end of this page'] = 'Bu sayfanın sonundaki formu gönder';
 $lang['Name and description for albums'] = 'Albümler için isim ve açıklama';
 $lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'g2data/albums (Gallery2) or var/albums (Gallery3) içeriklerini piwigo/galleries içerisine kopyala';
+$lang['No Menalto tables found!'] = 'Menalto tabloları bulunamadı!';
+$lang['useless on Gallery3'] = 'Gallery3 \'de gereksiz';
