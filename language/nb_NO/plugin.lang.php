@@ -21,3 +21,22 @@
 // | USA.                                                                  |
 // +-----------------------------------------------------------------------+
 $lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Kopiere innholdet i g2data/album (Gallery2) eller var/album (Gallery3) inn i Piwigo/gallerier';
+$lang['Import from Menalto'] = 'Import fra Menalto';
+$lang['database host'] = 'database vert';
+$lang['database name'] = 'database navn';
+$lang['database password'] = 'database passord';
+$lang['database user'] = 'database bruker';
+$lang['table prefix'] = 'tabell prefiks';
+$lang['useless on Gallery3'] = 'bruker på Galleri3';
+$lang['column prefix'] = 'kolonne prefiks';
+$lang['User comments on photos'] = 'Bruker kommentar på bilde';
+$lang['Title and description for photos'] = 'Tittel og beskrivelse for bilder';
+$lang['Submit the form at the end of this page'] = 'Send inn skjemaet på slutten av denne siden';
+$lang['Start import'] = 'Start import';
+$lang['No Menalto tables found!'] = 'Ingen Menalto tabell er funnet!';
+$lang['Name and description for albums'] = 'Navn og beskrivelse for album';
+$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Menalto2Piwigo programtillegg importerer data fra en Menalto Galleri2/Galleri3 installasjon i Piwigo.';
+$lang['Install and activate plugins:'] = 'Installere og aktiver programtillegget:';
+$lang['Imported properties:'] = 'Importere egenskaper:';
+$lang['Import'] = 'Import';
+$lang['How to use it?'] = 'Hvordan bruke det?';
