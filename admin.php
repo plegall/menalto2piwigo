@@ -575,13 +575,16 @@ SELECT
         ),
       $album_thumbs
       );
-    
-    mass_inserts(
-      COMMENTS_TABLE,
-      array_keys($comment_inserts[0]),
-      $comment_inserts
-      );
 
+    if (isset($comment_inserts) and count($comment_inserts) > 0)
+    {
+      mass_inserts(
+        COMMENTS_TABLE,
+        array_keys($comment_inserts[0]),
+        $comment_inserts
+        );
+    }
+    
     mass_inserts(
       TAGS_TABLE,
       array_keys($tag_inserts[0]),
