@@ -396,9 +396,11 @@ SELECT
     $result = pwg_query($query);
     while ($row = pwg_db_fetch_assoc($result))
     {
-      if (isset($piwigo_paths[ $row['relative_path_cache'] ]))
+      $relative_path_cache = urldecode($row['relative_path_cache']);
+      
+      if (isset($piwigo_paths[ $relative_path_cache ]))
       {
-        $piwigo_id = $piwigo_paths[ $row['relative_path_cache'] ];
+        $piwigo_id = $piwigo_paths[ $relative_path_cache ];
       }
       else
       {
