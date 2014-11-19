@@ -204,7 +204,7 @@ SELECT
 
         if (strpos($piwigo_id, 'i') === false)
         {
-          echo 'Error, '.$piwig_id.' is not an image and Menalto says it is an image';
+          echo 'Error, '.$piwigo_id.' is not an image and Menalto says it is an image';
         }
       
         $comment = "";
