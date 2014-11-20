@@ -288,7 +288,7 @@ SELECT d2.".$pc."derivativeSourceId
     // apply highlites as representative images
     foreach ($hid as $cat_id => $menalto_id)
     {
-      if (!empty($menalto_id))
+      if (!empty($menalto_id) and isset($iid[$menalto_id]))
       {
         $album_thumbs[] = array(
           'id' => $cat_id,
