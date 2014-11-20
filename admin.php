@@ -129,7 +129,7 @@ SELECT
   }
   unset($albums);
 
-  ksort($piwigo_paths);
+  ksort($piwigo_paths, SORT_STRING);
   // echo '<pre>'; print_r($piwigo_paths); echo '</pre>';
 
   m2p_db_connect();
