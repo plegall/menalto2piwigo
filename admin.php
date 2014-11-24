@@ -298,7 +298,9 @@ SELECT d2.".$pc."derivativeSourceId
     }
 
     // copy comments
-    $query = "
+    if (in_array($pt.'Comment', $menalto_tables))
+    {
+      $query = "
 SELECT
     c.".$pc."parentId AS id,
     t.".$pc."subject AS subject,
@@ -309,24 +311,25 @@ SELECT
     JOIN ".$pt."Comment t ON t.".$pc."id = c.".$pc."id
   WHERE t.".$pc."publishStatus=0
 ";
-    $result = pwg_query($query);
-    while ($row = pwg_db_fetch_assoc($result))
-    {
-      if (isset($iid[ $row['id'] ]))
+      $result = pwg_query($query);
+      while ($row = pwg_db_fetch_assoc($result))
       {
-        $comment = $row['comment'];
-        if (!empty($row['subject']))
+        if (isset($iid[ $row['id'] ]))
         {
-          $comment = '[b]'.$row['subject'].'[/b] '.$comment;
+          $comment = $row['comment'];
+          if (!empty($row['subject']))
+          {
+            $comment = '[b]'.$row['subject'].'[/b] '.$comment;
+          }
+          
+          $comment_inserts[] = array(
+            'image_id' => $iid[ $row['id'] ],
+            'date' => $row['date'],
+            'author' => pwg_db_real_escape_string($row['author']),
+            'content' => pwg_db_real_escape_string($comment),
+            'validated' => 'true',
+            );
         }
-
-        $comment_inserts[] = array(
-          'image_id' => $iid[ $row['id'] ],
-          'date' => $row['date'],
-          'author' => pwg_db_real_escape_string($row['author']),
-          'content' => pwg_db_real_escape_string($comment),
-          'validated' => 'true',
-          );
       }
     }
 
