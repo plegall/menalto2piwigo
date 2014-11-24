@@ -369,11 +369,14 @@ SELECT
       $album_thumbs
       );
 
-    mass_inserts(
-      COMMENTS_TABLE,
-      array_keys($comment_inserts[0]),
-      $comment_inserts
-      );
+    if (isset($comment_inserts) and count($comment_inserts) > 0)
+    {
+      mass_inserts(
+        COMMENTS_TABLE,
+        array_keys($comment_inserts[0]),
+        $comment_inserts
+        );
+    }
 
     array_push($page['infos'], l10n('Information data registered in database'));
   }
@@ -622,12 +625,15 @@ SELECT
       }
     }
 
-    mass_inserts(
-      IMAGE_TAG_TABLE,
-      array_keys($image_tag_inserts[0]),
-      $image_tag_inserts
-      );
-
+    if (isset($image_tag_inserts) and count($image_tag_inserts) > 0)
+    {
+      mass_inserts(
+        IMAGE_TAG_TABLE,
+        array_keys($image_tag_inserts[0]),
+        $image_tag_inserts
+        );
+    }
+    
     array_push($page['infos'], l10n('Information data registered in database'));
   }
   else
