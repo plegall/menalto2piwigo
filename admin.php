@@ -132,6 +132,14 @@ SELECT
   // ksort($piwigo_paths, SORT_NATURAL);
   // echo '<pre>'; print_r($piwigo_paths); echo '</pre>';
 
+  $query = '
+SELECT
+    id,
+    name
+  FROM '.TAGS_TABLE.'
+;';
+  $piwigo_tags = query2array($query, 'name', 'id');
+
   m2p_db_connect();
 
   // Gallery2 or Gallery3?
@@ -154,7 +162,8 @@ SELECT
     a.".$pc."viewCount AS viewCount,
     FROM_UNIXTIME(e.".$pc."creationTimestamp) AS created_on,
     c.".$pc."parentId AS parentId,
-    f.".$pc."pathComponent AS pathComponent
+    f.".$pc."pathComponent AS pathComponent,
+    i.".$pc."keywords AS keywords
   FROM ".$pt."Item i
     JOIN ".$pt."FileSystemEntity f ON i.".$pc."id = f.".$pc."id
     JOIN ".$pt."ChildEntity c ON f.".$pc."id = c.".$pc."id
@@ -264,6 +273,25 @@ SELECT
           'comment' => pwg_db_real_escape_string($comment),
           'date_available' => $date_available,
           );
+
+        // tags
+        if (!empty($item['keywords']))
+        {
+          foreach (explode(',', $item['keywords']) as $keyword)
+          {
+            $keyword = trim($keyword);
+
+            if (!isset($piwigo_tags[$keyword]) and !isset($menalto_keywords[$keyword]))
+            {
+              $tag_inserts[] = array(
+                'name' => pwg_db_real_escape_string($keyword),
+                'url_name' => str2url($keyword),
+                );
+            }
+
+            $menalto_keywords[$keyword][] = $image_id;
+          }
+        }
       
         // build a map from gallery2 ids to piwigo image ids
         $iid[$item['id']] = $image_id;
@@ -409,6 +437,75 @@ SELECT
         array_keys($comment_inserts[0]),
         $comment_inserts
         );
+    }
+
+    if (isset($tag_inserts) and count($tag_inserts) > 0)
+    {
+      mass_inserts(
+        TAGS_TABLE,
+        array_keys($tag_inserts[0]),
+        $tag_inserts
+        );
+      
+      // refresh the $piwigo_tags array with new tags from Menalto
+      $query = '
+SELECT
+    id,
+    name
+  FROM '.TAGS_TABLE.'
+;';
+      $piwigo_tags = query2array($query, 'name', 'id');
+    }
+
+    if (isset($menalto_keywords) and count($menalto_keywords) > 0)
+    {
+      // avoid duplicates in table image_tag
+      $image_tag_associations = array();
+      
+      $query = '
+SELECT
+    image_id,
+    tag_id
+  FROM '.IMAGE_TAG_TABLE.'
+;';
+      $result = pwg_query($query);
+      while ($row = pwg_db_fetch_assoc($result))
+      {
+        $image_tag_associations[ $row['image_id'].'~'.$row['tag_id'] ] = 1;
+      }
+      
+      foreach ($menalto_keywords as $keyword => $piwigo_ids)
+      {
+        if (!isset($piwigo_tags[$keyword]))
+        {
+          echo 'missing piwigo tag for keyword #'.$keyword.'#<br>';
+          continue;
+        }
+
+        $tag_id = $piwigo_tags[$keyword];
+
+        foreach ($piwigo_ids as $piwigo_id)
+        {
+          if (isset($image_tag_associations[$piwigo_id.'~'.$tag_id]))
+          {
+            continue;
+          }
+          
+          $image_tag_inserts[] = array(
+            'image_id' => $piwigo_id,
+            'tag_id' => $tag_id,
+            );
+        }
+      }
+
+      if (isset($image_tag_inserts) and count($image_tag_inserts) > 0)
+      {
+        mass_inserts(
+          IMAGE_TAG_TABLE,
+          array_keys($image_tag_inserts[0]),
+          $image_tag_inserts
+          );
+      }
     }
 
     array_push($page['infos'], l10n('Information data registered in database'));
