@@ -1,0 +1,1 @@
+імпортує дані з Menalto Gallery до Piwigo
