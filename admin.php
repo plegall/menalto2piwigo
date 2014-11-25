@@ -129,7 +129,7 @@ SELECT
   }
   unset($albums);
 
-  ksort($piwigo_paths, SORT_STRING);
+  // ksort($piwigo_paths, SORT_NATURAL);
   // echo '<pre>'; print_r($piwigo_paths); echo '</pre>';
 
   m2p_db_connect();
@@ -141,64 +141,96 @@ SELECT
   {
     // Gallery version 2
 
-    // Gallery2 parent Ids (root is always 7!)
-    $ids = array(7,0,0,0,0,0);
-    // Piwigo uppercats
-    $uct = array('NULL',0,0,0,0,0);
-    $ranks = array();
+    $menalto_items = array();
 
-    // the following algorithm is a conversion into PHP of the Perl script
-    // convertcomments.pl by dschwen, see https://github.com/dschwen/g2piwigo
-    //
-    // this plugin just makes things "simpler" for users but the hard part
-    // comes from dschwen, he deserves all credits!
-  
-    foreach ($piwigo_paths as $dir => $piwigo_id)
-    {
-      $path = explode('/', $dir);
-      $basename = $path[count($path)-1];
-      $level = count($path);
-
-      $parentId = $ids[$level-1];
-
-      // get id and title/summary/description of tail element in path
-      $query = "
+    $query = "
 SELECT 
-    f.".$pc."id,
-    i.".$pc."title,
-    i.".$pc."summary,
-    i.".$pc."description,
-    i.".$pc."canContainChildren,
-    a.".$pc."orderWeight,
-    a.".$pc."viewCount,
-    FROM_UNIXTIME(e.".$pc."creationTimestamp)
+    f.".$pc."id AS id,
+    i.".$pc."title AS title,
+    i.".$pc."summary AS summary,
+    i.".$pc."description AS description,
+    i.".$pc."canContainChildren AS canContainChildren,
+    a.".$pc."orderWeight AS orderWeight,
+    a.".$pc."viewCount AS viewCount,
+    FROM_UNIXTIME(e.".$pc."creationTimestamp) AS created_on,
+    c.".$pc."parentId AS parentId,
+    f.".$pc."pathComponent AS pathComponent
   FROM ".$pt."Item i
     JOIN ".$pt."FileSystemEntity f ON i.".$pc."id = f.".$pc."id
     JOIN ".$pt."ChildEntity c ON f.".$pc."id = c.".$pc."id
     JOIN ".$pt."ItemAttributesMap a ON i.".$pc."id = a.".$pc."itemId
     JOIN ".$pt."Entity e ON e.".$pc."id = i.".$pc."id
-  WHERE c.".$pc."parentId = ".$parentId."
-    AND f.".$pc."pathComponent='".$basename."'
 ;";
-      // echo '<pre>'.$query."</pre>";
-      $row = pwg_db_fetch_row(pwg_query($query));
-    
-      // print "$row[4] - $parentId -> $row[0] : $row[1] $row[2] $row[3]<br>";
-      $title = m2p_remove_bbcode($row[1]);
-      if (empty($title))
+    $result = pwg_query($query);
+    while ($row = pwg_db_fetch_assoc($result))
+    {
+      $menalto_items[ $row['id'] ] = $row;
+    }
+
+    // build the path for each item
+    foreach ($menalto_items as $id => $item)
+    {
+      // 7 is root on Menalto
+      if (7 == $id)
       {
-        $title = $basename;
+        $menalto_items[$id]['path'] = '';
+        continue;
       }
       
-      $summary = m2p_remove_bbcode($row[2]);
-      $description = m2p_remove_bbcode($row[3]);
-      $weight = $row[5];
-      $views = $row[6];
-      $date_available = $row[7];
-      $ids[$level] = $row[0];
-      $pid[$row[0]] = $dir;
+      $path = $item['pathComponent'];
+      $parentId = $item['parentId'];
+      $levels = 0;
+      
+      while ($parentId != 7)
+      {
+        $path = $menalto_items[ $parentId ]['pathComponent'].'/'.$path;
+        $parentId = $menalto_items[ $parentId ]['parentId'];
 
-      if ($row[4] == 0)
+        // avoid infinite loop
+        if ($levels++ > 50)
+        {
+          die("stop execution, infinite loop to generate absolute path, for ".$item['pathComponent']);
+        }
+      }
+
+      $menalto_items[$id]['path'] = $path;
+    }
+
+    $counter_not_found = 0;
+    $counter_found = 0;
+    
+    foreach ($menalto_items as $id => $item)
+    {
+      if (isset($piwigo_paths[ $item['path'] ]))
+      {
+        $piwigo_id = $piwigo_paths[ $item['path'] ];
+        $counter_found++;
+      }
+      else
+      {
+        if (7 != $item['id'])
+        {
+          // echo 'Match not found for #'.$item['path'].'#<br>';
+          $counter_not_found++;
+        }
+        
+        continue;
+      }
+
+      
+      $title = m2p_remove_bbcode($item['title']);
+      if (empty($title))
+      {
+        $title = $item['pathComponent'];
+      }
+      
+      $summary = m2p_remove_bbcode($item['summary']);
+      $description = m2p_remove_bbcode($item['description']);
+      $weight = $item['orderWeight'];
+      $views = $item['viewCount'];
+      $date_available = $item['created_on'];
+
+      if ($item['canContainChildren'] == 0)
       {
         // Menalto says it's an image
 
@@ -234,7 +266,7 @@ SELECT
           );
       
         // build a map from gallery2 ids to piwigo image ids
-        $iid[$row[0]] = $image_id;
+        $iid[$item['id']] = $image_id;
       }
       else
       {
@@ -263,7 +295,6 @@ SELECT
 
         // get piwigo category id
         $cat_id = substr($piwigo_id, 1);
-        $uct[$level] = $cat_id;
       
         $cat_updates[] = array(
           'id' => $cat_id,
@@ -272,18 +303,20 @@ SELECT
           'rank' => $weight,
           );
 
-        // get highlight picture 
+        // get highlight picture
         $query = "
 SELECT d2.".$pc."derivativeSourceId 
   FROM ".$pt."ChildEntity c
     JOIN ".$pt."Derivative d1 ON c.".$pc."id = d1.".$pc."id
     JOIN ".$pt."Derivative d2 ON d1.".$pc."derivativeSourceId=d2.".$pc."id
-  WHERE c.".$pc."parentId = ".$ids[$level];
+  WHERE c.".$pc."parentId = ".$item['parentId'];
         $subresult = pwg_query($query);
         $subrow = pwg_db_fetch_row($subresult);
         $hid[$cat_id] = $subrow[0];
       }
     }
+
+    // echo 'found = '.$counter_found.', not found = '.$counter_not_found.'<br>';
 
     // apply highlites as representative images
     foreach ($hid as $cat_id => $menalto_id)
