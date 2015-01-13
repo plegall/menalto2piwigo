@@ -503,7 +503,8 @@ SELECT
         mass_inserts(
           IMAGE_TAG_TABLE,
           array_keys($image_tag_inserts[0]),
-          $image_tag_inserts
+          $image_tag_inserts,
+          array( 'ignore' => true )  // ignore duplicated tags added to item
           );
       }
     }
@@ -663,10 +664,14 @@ SELECT
     $result = pwg_query($query);
     while ($row = pwg_db_fetch_assoc($result))
     {
-      $tag_inserts[] = array(
-        'name' => pwg_db_real_escape_string($row['name']),
-        'url_name' => str2url($row['name']),
+      // Don't add the tag if it's already in Piwigo
+      if (!isset($piwigo_tags[$row['name']]))
+      {
+        $tag_inserts[] = array(
+          'name' => pwg_db_real_escape_string($row['name']),
+          'url_name' => str2url($row['name']),
         );
+      }
 
       $menalto_tag_ids[ $row['name'] ] = $row['id'];
     }
@@ -721,11 +726,14 @@ SELECT
         );
     }
     
-    mass_inserts(
-      TAGS_TABLE,
-      array_keys($tag_inserts[0]),
-      $tag_inserts
-      );
+    if (isset($tag_inserts) and count($tag_inserts) > 0)
+    {
+      mass_inserts(
+        TAGS_TABLE,
+        array_keys($tag_inserts[0]),
+        $tag_inserts
+        );
+    }
 
     // we need to retrieve the mapping of piwigo tag name => piwigo tag id,
     // for image_tag associations
@@ -760,7 +768,8 @@ SELECT
       mass_inserts(
         IMAGE_TAG_TABLE,
         array_keys($image_tag_inserts[0]),
-        $image_tag_inserts
+        $image_tag_inserts,
+        array( 'ignore' => true )  // ignore duplicated tags added to item
         );
     }
     
