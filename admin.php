@@ -66,9 +66,9 @@ if (isset($_POST['submit']))
   {
     $conf['menalto2piwigo'][$key] = $_POST[$key];
   }
-  
+
   conf_update_param('menalto2piwigo', serialize($conf['menalto2piwigo']));
-  
+
   $pt = $conf['menalto2piwigo']['prefix_table'];
   $pc = $conf['menalto2piwigo']['prefix_column'];
 
@@ -119,7 +119,7 @@ SELECT
     {
       $path_tokens[] = $albums[$uppercat_id]['dir'];
     }
-    
+
     $albums[$id]['path'] = implode('/', $path_tokens);
   }
 
@@ -147,29 +147,54 @@ SELECT
 
   if (in_array($pt.'FileSystemEntity', $menalto_tables))
   {
+    $is_tag_installed = false;
+    if (in_array($pt.'TagItemMap', $menalto_tables))
+    {
+        // tags plugin is installed
+        $is_tag_installed = true;
+
+    }
     // Gallery version 2
 
     $menalto_items = array();
 
     $query = "
-SELECT 
+SELECT
     f.".$pc."id AS id,
     i.".$pc."title AS title,
     i.".$pc."summary AS summary,
     i.".$pc."description AS description,
     i.".$pc."canContainChildren AS canContainChildren,
+--    i.".$pc."ownerId AS ownerId,
     a.".$pc."orderWeight AS orderWeight,
     a.".$pc."viewCount AS viewCount,
     FROM_UNIXTIME(e.".$pc."creationTimestamp) AS created_on,
     c.".$pc."parentId AS parentId,
     f.".$pc."pathComponent AS pathComponent,
-    i.".$pc."keywords AS keywords
+    d.".$pc."size AS filesize,";
+    if ($is_tag_installed)
+    {
+        $query .= "group_concat(tm.".$pc."tagName) AS keywords ";
+    }
+    else
+    {
+        $query .= "i.".$pc."keywords AS keywords ";
+    }
+    $query .= "
   FROM ".$pt."Item i
     JOIN ".$pt."FileSystemEntity f ON i.".$pc."id = f.".$pc."id
     JOIN ".$pt."ChildEntity c ON f.".$pc."id = c.".$pc."id
     JOIN ".$pt."ItemAttributesMap a ON i.".$pc."id = a.".$pc."itemId
     JOIN ".$pt."Entity e ON e.".$pc."id = i.".$pc."id
-;";
+    LEFT JOIN ".$pt."DataItem d ON d.".$pc."id = i.".$pc."id";
+    if ($is_tag_installed)
+    {
+      $query .= "    LEFT JOIN ".$pt."TagItemMap tim ON i.".$pc."id = tim.".$pc."itemId
+    LEFT JOIN ".$pt."TagMap tm ON tim.".$pc."tagId = tm.".$pc."tagId
+    GROUP BY id
+";
+    }
+
     $result = pwg_query($query);
     while ($row = pwg_db_fetch_assoc($result))
     {
@@ -185,11 +210,11 @@ SELECT
         $menalto_items[$id]['path'] = '';
         continue;
       }
-      
+
       $path = $item['pathComponent'];
       $parentId = $item['parentId'];
       $levels = 0;
-      
+
       while ($parentId != 7)
       {
         $path = $menalto_items[ $parentId ]['pathComponent'].'/'.$path;
@@ -207,7 +232,8 @@ SELECT
 
     $counter_not_found = 0;
     $counter_found = 0;
-    
+    $hid = array();
+
     foreach ($menalto_items as $id => $item)
     {
       if (isset($piwigo_paths[ $item['path'] ]))
@@ -222,22 +248,24 @@ SELECT
           // echo 'Match not found for #'.$item['path'].'#<br>';
           $counter_not_found++;
         }
-        
+
         continue;
       }
 
-      
+
       $title = m2p_remove_bbcode($item['title']);
       if (empty($title))
       {
         $title = $item['pathComponent'];
       }
-      
-      $summary = m2p_remove_bbcode($item['summary']);
-      $description = m2p_remove_bbcode($item['description']);
+
+      // todo: maybe as a user input field, choose replace or remove
+      $summary = m2p_replace_bbcode($item['summary']);
+      $description = m2p_replace_bbcode($item['description']);
       $weight = $item['orderWeight'];
       $views = $item['viewCount'];
       $date_available = $item['created_on'];
+      $filesize = $item['filesize'];
 
       if ($item['canContainChildren'] == 0)
       {
@@ -247,11 +275,11 @@ SELECT
         {
           echo 'Error, '.$piwigo_id.' is not an image and Menalto says it is an image';
         }
-      
+
         $comment = "";
         if ( $summary != "" and $description != "" )
         {
-          $comment = "<b>$summary</b> - $description";
+          $comment = "$summary - $description";
         }
         else
         {
@@ -266,12 +294,14 @@ SELECT
         }
 
         $image_id = substr($piwigo_id, 1);
-      
+
         $image_updates[] = array(
           'id' => $image_id,
           'name' => pwg_db_real_escape_string($title),
           'comment' => pwg_db_real_escape_string($comment),
           'date_available' => $date_available,
+          'filesize' => round($filesize/1024),
+//          'added_by' => $ownerId
           );
 
         // tags
@@ -292,7 +322,7 @@ SELECT
             $menalto_keywords[$keyword][] = $image_id;
           }
         }
-      
+
         // build a map from gallery2 ids to piwigo image ids
         $iid[$item['id']] = $image_id;
       }
@@ -301,9 +331,9 @@ SELECT
         // album (folder)
         if (strpos($piwigo_id, 'c') === false)
         {
-          echo 'Error, '.$piwig_id.' is not an album and Menalto says it is an album';
+          echo 'Error, '.$piwigo_id.' is not an album and Menalto says it is an album';
         }
-      
+
         $comment = "";
         if ( $summary != "" and $description != "" )
         {
@@ -315,7 +345,7 @@ SELECT
           {
             $comment = $summary;
           }
-          else
+          elseif ($description != "")
           {
             $comment = "<!--complete-->$description";
           }
@@ -323,7 +353,7 @@ SELECT
 
         // get piwigo category id
         $cat_id = substr($piwigo_id, 1);
-      
+
         $cat_updates[] = array(
           'id' => $cat_id,
           'name' => pwg_db_real_escape_string($title),
@@ -333,7 +363,7 @@ SELECT
 
         // get highlight picture
         $query = "
-SELECT d2.".$pc."derivativeSourceId 
+SELECT d2.".$pc."derivativeSourceId
   FROM ".$pt."ChildEntity c
     JOIN ".$pt."Derivative d1 ON c.".$pc."id = d1.".$pc."id
     JOIN ".$pt."Derivative d2 ON d1.".$pc."derivativeSourceId=d2.".$pc."id
@@ -382,7 +412,7 @@ SELECT
           {
             $comment = '[b]'.$row['subject'].'[/b] '.$comment;
           }
-          
+
           $comment_inserts[] = array(
             'image_id' => $iid[ $row['id'] ],
             'date' => $row['date'],
@@ -407,7 +437,7 @@ SELECT
       IMAGES_TABLE,
       array(
         'primary' => array('id'),
-        'update'  => array('name', 'comment', 'date_available'),
+        'update'  => array('name', 'comment', 'date_creation', 'date_available', 'filesize'), #, 'added_by'
         ),
       $image_updates
       );
@@ -446,7 +476,7 @@ SELECT
         array_keys($tag_inserts[0]),
         $tag_inserts
         );
-      
+
       // refresh the $piwigo_tags array with new tags from Menalto
       $query = '
 SELECT
@@ -461,7 +491,7 @@ SELECT
     {
       // avoid duplicates in table image_tag
       $image_tag_associations = array();
-      
+
       $query = '
 SELECT
     image_id,
@@ -473,7 +503,7 @@ SELECT
       {
         $image_tag_associations[ $row['image_id'].'~'.$row['tag_id'] ] = 1;
       }
-      
+
       foreach ($menalto_keywords as $keyword => $piwigo_ids)
       {
         if (!isset($piwigo_tags[$keyword]))
@@ -490,7 +520,7 @@ SELECT
           {
             continue;
           }
-          
+
           $image_tag_inserts[] = array(
             'image_id' => $piwigo_id,
             'tag_id' => $tag_id,
@@ -531,10 +561,11 @@ SELECT
   FROM '.$pt.'items
 ;';
     $result = pwg_query($query);
+    $cover_id = array();
     while ($row = pwg_db_fetch_assoc($result))
     {
       $relative_path_cache = urldecode($row['relative_path_cache']);
-      
+
       if (isset($piwigo_paths[ $relative_path_cache ]))
       {
         $piwigo_id = $piwigo_paths[ $relative_path_cache ];
@@ -543,11 +574,11 @@ SELECT
       {
         continue;
       }
-      
+
       if ('photo' == $row['type'])
       {
         $image_id = substr($piwigo_id, 1);
-      
+
         $image_updates[] = array(
           'id' => $image_id,
           'name' => pwg_db_real_escape_string($row['title']),
@@ -562,14 +593,14 @@ SELECT
       elseif ('album' == $row['type'])
       {
         $cat_id = substr($piwigo_id, 1);
-        
+
         $cat_updates[] = array(
           'id' => $cat_id,
           'name' => pwg_db_real_escape_string($row['title']),
           'comment' => pwg_db_real_escape_string($row['description']),
           'rank' => $row['weight'],
           );
-        
+
         $cover_id[$cat_id] = $row['album_cover_item_id'];
       }
     }
@@ -639,7 +670,7 @@ SELECT
         }
 
         $anonymous_id = implode('.', array_slice(explode('.', $row['server_remote_addr']), 0, 3));
-        
+
         $comment_inserts[] = array(
           'image_id' => $iid[ $row['item_id'] ],
           'date' => date('Y-m-d H:i:s', $row['created']),
@@ -698,7 +729,7 @@ SELECT
         ),
       $image_updates
       );
-    
+
     mass_updates(
       CATEGORIES_TABLE,
       array(
@@ -707,7 +738,7 @@ SELECT
         ),
       $cat_updates
       );
-    
+
     mass_updates(
       CATEGORIES_TABLE,
       array(
@@ -725,7 +756,7 @@ SELECT
         $comment_inserts
         );
     }
-    
+
     if (isset($tag_inserts) and count($tag_inserts) > 0)
     {
       mass_inserts(
@@ -772,7 +803,7 @@ SELECT
         array( 'ignore' => true )  // ignore duplicated tags added to item
         );
     }
-    
+
     array_push($page['infos'], l10n('Information data registered in database'));
   }
   else
