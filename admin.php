@@ -299,6 +299,7 @@ SELECT
           'id' => $image_id,
           'name' => pwg_db_real_escape_string($title),
           'comment' => pwg_db_real_escape_string($comment),
+          'date_creation' => $date_available,
           'date_available' => $date_available,
           'filesize' => round($filesize/1024),
 //          'added_by' => $ownerId
@@ -583,6 +584,7 @@ SELECT
           'id' => $image_id,
           'name' => pwg_db_real_escape_string($row['title']),
           'comment' => pwg_db_real_escape_string($row['description']),
+          'date_creation' => date('Y-m-d H:i:s', $row['created']),
           'date_available' => date('Y-m-d H:i:s', $row['created']),
           'hit' => $row['view_count'],
           );
