@@ -301,8 +301,15 @@ SELECT
           'comment' => pwg_db_real_escape_string($comment),
           'date_creation' => $date_available,
           'date_available' => $date_available,
+          'hit' => $views,
           'filesize' => round($filesize/1024),
 //          'added_by' => $ownerId
+          );
+
+        // Copy the weight to piwigo's image_category database table.
+        $image_category_updates[] = array(
+          'image_id' => $image_id,
+          'rank' => $weight,
           );
 
         // tags
@@ -338,13 +345,13 @@ SELECT
         $comment = "";
         if ( $summary != "" and $description != "" )
         {
-          $comment = "$summary <!--complete--> $description";
+          $comment = "$summary<!--complete-->$description";
         }
         else
         {
           if ($summary != "")
           {
-            $comment = $summary;
+            $comment = "$summary<!--complete-->";
           }
           elseif ($description != "")
           {
@@ -368,7 +375,7 @@ SELECT d2.".$pc."derivativeSourceId
   FROM ".$pt."ChildEntity c
     JOIN ".$pt."Derivative d1 ON c.".$pc."id = d1.".$pc."id
     JOIN ".$pt."Derivative d2 ON d1.".$pc."derivativeSourceId=d2.".$pc."id
-  WHERE c.".$pc."parentId = ".$item['parentId'];
+  WHERE c.".$pc."parentId = ".$item['id'];      // See http://piwigo.org/forum/viewtopic.php?pid=158127#p158127
         $subresult = pwg_query($query);
         $subrow = pwg_db_fetch_row($subresult);
         $hid[$cat_id] = $subrow[0];
@@ -438,9 +445,18 @@ SELECT
       IMAGES_TABLE,
       array(
         'primary' => array('id'),
-        'update'  => array('name', 'comment', 'date_creation', 'date_available', 'filesize'), #, 'added_by'
+        'update'  => array('name', 'comment', 'date_creation', 'date_available', 'hit', 'filesize'), #, 'added_by'
         ),
       $image_updates
+      );
+
+    mass_updates(
+      IMAGE_CATEGORY_TABLE,
+      array(
+        'primary' => array('image_id'),
+        'update'  => array('rank'),
+        ),
+      $image_category_updates
       );
 
     mass_updates(
