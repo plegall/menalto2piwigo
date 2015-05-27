@@ -27,11 +27,11 @@ function m2p_db_disconnect()
   global $conf;
 
   // reconnect to the Piwigo database
-  $pwg_db_link = pwg_db_connect(
-    $conf['db_host'],
-    $conf['db_user'],
-    $conf['db_password'],
-    $conf['db_base']
+    pwg_db_connect(
+        $conf['db_host'],
+        $conf['db_user'],
+        $conf['db_password'],
+        $conf['db_base']
     );
 
   pwg_db_check_charset();
@@ -54,6 +54,26 @@ function m2p_remove_bbcode($string)
   }
 
   return $string;
+}
+
+function m2p_replace_bbcode($string)
+{
+    $patterns = array(
+        '@\[color=(.+?)\](.*?)\[/color\]@s',
+        '@\[url=(.+?)\](.*?)\[/url\]@s',
+        '@\[b\](.*?)\[/b\]@s',
+        '@\[i\](.*?)\[/i\]@s',
+    );
+    $replace = array(
+        '<span style="color:${1}">${2}</span>',
+        '<a href="${1}" target="_blank">${2}</a>',
+        '<b>$1</b>',
+        '<i>$1</i>',
+    );
+
+    $string = preg_replace($patterns, $replace, $string);
+
+    return $string;
 }
 
 /**
