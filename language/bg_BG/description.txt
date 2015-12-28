@@ -1,0 +1,1 @@
+Импортира данни от Menalto Gallery в Piwigo. 
