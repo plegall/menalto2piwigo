@@ -681,10 +681,10 @@ SELECT
           $author_id = 2; // guest on Piwigo
         }
 
-        $validated = 'true';
-        if ('unpublished' == $row['state'])
+        $validated = 'false';
+        if ('published' == $row['state'])
         {
-          $validated = 'false';
+          $validated = 'true';
         }
 
         $anonymous_id = implode('.', array_slice(explode('.', $row['server_remote_addr']), 0, 3));
