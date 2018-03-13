@@ -20,13 +20,13 @@
 // | Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, |
 // | USA.                                                                  |
 // +-----------------------------------------------------------------------+
-$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Kopier indholdet fra g2data/albums (Gallery2) or var/albums (Gallery3) til piwigo/galleries';
+$lang['Copy the content of g2data/albums (Gallery2) or var/albums (Gallery3) into piwigo/galleries'] = 'Kopier indholdet fra g2data/albums (Gallery2) eller var/albums (Gallery3) til piwigo/galleries';
 $lang['How to use it?'] = 'Anvendelse';
 $lang['Import'] = 'Importer';
 $lang['Import from Menalto'] = 'Importer fra Menalto';
-$lang['Imported properties:'] = 'Importerede egenskaber';
+$lang['Imported properties:'] = 'Importerede egenskaber:';
 $lang['Install and activate plugins:'] = 'Installer og aktiver plugins:';
-$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Menalto2Piwigo-plugin\'en importerer data fra en Menalto Gallery2/Gallery3-installation til Piwigo.';
+$lang['Menalto2Piwigo plugin imports data from a Menalto Gallery2/Gallery3 installation into Piwigo.'] = 'Plugin\'en Menalto2Piwigo importerer data fra en Menalto Gallery2-/Gallery3-installation til Piwigo.';
 $lang['Name and description for albums'] = 'Navn og beskrivelse af albummer';
 $lang['Start import'] = 'Start import';
 $lang['Submit the form at the end of this page'] = 'Send formularen i slutningen af denne side';
