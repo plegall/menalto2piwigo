@@ -315,7 +315,7 @@ SELECT
         // tags
         if (!empty($item['keywords']))
         {
-          foreach (explode(',', $item['keywords']) as $keyword)
+          foreach (preg_split("/[,;]+/", $item['keywords']) as $keyword)
           {
             $keyword = trim($keyword);
 
