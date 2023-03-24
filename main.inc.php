@@ -6,6 +6,7 @@ Description: import data from a Menalto Gallery into Piwigo
 Plugin URI: http://piwigo.org/ext/extension_view.php?eid=
 Author: plg
 Author URI: http://le-gall.net/pierrick
+Has Settings: true
 */
 
 if (!defined('PHPWG_ROOT_PATH'))
